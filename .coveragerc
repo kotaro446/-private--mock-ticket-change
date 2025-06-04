@@ -1,0 +1,8 @@
+[run]
+omit =
+    app/src/tests/test_compare_response_ecticket.py
+    app/src/tests/test_request_response_dict_ecticket.py
+    app/src/tests/test_compare_response_in_ticket.py
+    app/src/tests/test_request_response_dict_in_ticket.py
+    app/src/tests/test_compare_response_toto_ticket.py
+    app/src/tests/test_request_response_dict_toto_ticket.py

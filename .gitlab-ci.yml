@@ -1,0 +1,4 @@
+include:
+  - project: nativeApp-pos/Application/Custom/001-SEJ/microservice/pipeline-resources
+    ref: 2.0.4
+    file: .gitlab-ci/.gitlab-ci-flask-mock.yml
