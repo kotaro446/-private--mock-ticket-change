@@ -226,6 +226,83 @@ def get_payback_info_dictionary(request_data:dict) -> dict:
         res = {}
     return res
 
+def get_order_details_dictionary(request_data:dict) -> dict:
+    """
+    order_details辞書を作成（要求区分B,H,Jの場合に使用）
+    """
+    res:dict = {}
+    # 要求区分B,H,Jの場合のみorder_detailsを作る
+    if (request_data["yokyu_kubun"] in {"B", "H", "J"}):
+        res = {
+            "regi_msg_code": "     ",
+            "dlv_mise_date_yotei_ymd": "        ",
+            "dlv_mise_time_yotei_hm": "    ",
+            "nohin_setumei_kbn": "  ",
+            "dlv_ymd": "        ",
+            "sej_shohin_code": "000000",
+            "site_nai_shiharai_kingaku": "000000",
+            "oisogi_flg": " ",
+            "oisogi_fee": "000000",
+            "other_fee": "000000",
+            "tax_kbn": " ",
+            "tax_ritsu": "000",
+            "oisogi_delay_flg": " ",
+            "tyumon_no": "              ",
+            "site_kensu": "0",
+            "site_utiwake1": "    ",
+            "site_name1": "                      ",
+            "site_price1": "000000",
+            "site_crekbn1": " ",
+            "site_utiwake2": "    ",
+            "site_name2": "                      ",
+            "site_price2": "000000",
+            "site_crekbn2": " ",
+            "site_utiwake3": "    ",
+            "site_name3": "                      ",
+            "site_price3": "000000",
+            "site_crekbn3": " ",
+            "site_utiwake4": "    ",
+            "site_name4": "                      ",
+            "site_price4": "000000",
+            "site_crekbn4": " ",
+            "shohin_daikin_hyojun": "      ",
+            "shohin_daikin_keigen": "      ",
+            "sej_shohin_code_hyojun": "      ",
+            "sej_shohin_code_keigen": "      ",
+            "tax_kbn_hyojun": " ",
+            "tax_kbn_keigen": " ",
+            "tax_ritsu_hyojun": "   ",
+            "tax_ritsu_keigen": "   ",
+            "category_name_hyojun": "                      ",
+            "category_name_keigen": "                      ",
+            "kana_simei": "                                                  ",
+            "shouken_num": "          ",
+            "kanyu_type": "                        ",
+            "hoken_siki": "          ",
+            "hoken_shuki": "          ",
+            "hoken_shuryou_bi": "                ",
+            "hoken_nissu": "00",
+            "shohin_daikin_hikazei": "      ",
+            "sej_shohin_code_hikazei": "      ",
+            "tax_kbn_hikazei": " ",
+            "category_name_hikazei": "                      ",
+            "shohin_nebiki_kingaku_hyojun": "      ",
+            "shohin_nebiki_kingaku_keigen": "      ",
+            "shohin_nebiki_kingaku_hikazei": "      ",
+            "tax_kbn_hosoryo_takuhairyo": " ",
+            "shohin_daikin_hosoryo": "      ",
+            "sej_shohin_code_hosoryo": "      ",
+            "nebiki_kingaku_hosoryo": "      ",
+            "shohin_daikin_takuhairyo": "      ",
+            "sej_shohin_code_takuhairyo": "      ",
+            "nebiki_kingaku_takuhairyo": "      ",
+            "sake_kbn": " ",
+            "ondotai_kbn": " ",
+            "tento_mae_kingaku": "      ",
+            "zan_item_umu": "0",
+        }
+    return res
+
 def get_test_option(request_data:dict) -> tuple[int, str]:
     """
     optionの番号と文字列の取得

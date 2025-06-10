@@ -7,6 +7,7 @@ from ec_ticket_library import (
     get_interface_info_dictionary,
     get_order_info_dictionary,
     get_payback_info_dictionary,
+    get_order_details_dictionary,
     ec_ticket_validate_check,
     get_test_option,
 )
@@ -34,6 +35,7 @@ def mock_ecticket_ms_main(request_data:dict)  ->  Response:
     order_info:dict = {}
     ticket_info:dict = {}
     payback_info:dict = {}
+    order_details:dict = {}
     httpstatus:int = 400
 
     try:
@@ -50,6 +52,7 @@ def mock_ecticket_ms_main(request_data:dict)  ->  Response:
             order_info,  
             ticket_info,
             payback_info,
+            order_details,
             httpstatus) = make_ticket_info(request_data)
     except ValueError as e:
         logger.debug(f"ValueError: {e}")
@@ -59,11 +62,11 @@ def mock_ecticket_ms_main(request_data:dict)  ->  Response:
     #==========================#
     # レスポンスXMLを生成して返却#
     #==========================#
-    xml_response = ec_ticket_output_xml(request_data, interface_info, order_info, ticket_info, payback_info)
+    xml_response = ec_ticket_output_xml(request_data, interface_info, order_info, ticket_info, payback_info, order_details)
     logger.debug(f"レスポンスデータ: {xml_response}")
     return Response(xml_response.encode(encoding='cp932'), status=httpstatus, content_type='text/xml; charset=Windows-31J')
   
-def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, int]:
+def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, dict, int]:
     """
     チケット情報を作成
 
@@ -77,6 +80,7 @@ def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, int]:
     order_info:dict  
     res_ticket_info:dict  
     payback_info:dict  
+    order_details:dict
     httpstatus:int
     """
 
@@ -86,6 +90,7 @@ def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, int]:
     interface_info = get_interface_info_dictionary(request_data)
     order_info = get_order_info_dictionary(request_data)
     payback_info = get_payback_info_dictionary(request_data)
+    order_details = get_order_details_dictionary(request_data)
 
     #===============================#
     # リクエストからオプション取得     #
@@ -139,4 +144,4 @@ def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, int]:
     order_info.update(res_order_info)
     payback_info.update(res_payback_info)
 
-    return (interface_info, order_info, res_ticket_info, payback_info, httpstatus)
+    return (interface_info, order_info, res_ticket_info, payback_info, order_details, httpstatus)
