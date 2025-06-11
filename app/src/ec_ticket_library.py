@@ -226,12 +226,13 @@ def get_payback_info_dictionary(request_data:dict) -> dict:
         res = {}
     return res
 
+
 def get_order_details_dictionary(request_data:dict) -> dict:
     """
     order_details辞書を作成（要求区分B,H,Jの場合に使用）
     """
     res:dict = {}
-    # 要求区分B,H,Jの場合のみorder_detailsを作る
+    # 要求区分B,H,Jの場合のみorder_detailsを返す
     if (request_data["yokyu_kubun"] in {"B", "H", "J"}):
         res = {
             "regi_msg_code": "     ",

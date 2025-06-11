@@ -14,9 +14,10 @@ from ec_ticket_library import (
     get_ec_query_kingaku_henko_flg,
     get_ec_query_kino_kbn,
     get_ec_query_shuno_kingaku,
+    get_order_details_dictionary,
 )
 
-def get_ec_nomal_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,dict,int]:
+def get_ec_nomal_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,dict,dict,int]:
     """
     No.1_EC関連問合せ応答の更新データを取得する
     ----
@@ -30,7 +31,8 @@ def get_ec_nomal_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,di
     -------
     interface_info :dict  
     order_info :dict  
-    ticket_info :dict  
+    ticket_info :dict
+    order_details :dict
     httpstatus :int
     """
 
@@ -57,8 +59,13 @@ def get_ec_nomal_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,di
     (interface_info, httpstatus) = get_interface_info(request_data, mapping)
     order_info = get_order_info(request_data, mapping)
     ticket_info = get_ticket_info(request_data, mapping[11], order_info)
+    
+    # order_detailsを生成（B,H,J要求区分の場合のみ）
+    order_details = {}
+    if request_data["yokyu_kubun"] in {"B", "H", "J"}:
+        order_details = get_order_details_dictionary(request_data)
 
-    return (interface_info, order_info, ticket_info, httpstatus)
+    return (interface_info, order_info, ticket_info, order_details, httpstatus)
 
 def get_interface_info(request_data:dict, mapping:list) -> tuple[dict,int]:
     """
@@ -241,4 +248,3 @@ def get_ec_query_shop_id(map_num:int)->str:
         4 : "30731", #ぴあ
     }, map_num, "00000")
     return res
-

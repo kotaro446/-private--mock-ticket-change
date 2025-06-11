@@ -14,9 +14,10 @@ from ec_ticket_library import (
     get_ec_query_shuno_kingaku,
     get_ec_kanryo_inshi_syukin_gaku,
     check_pia_ticket,
+    get_order_details_dictionary,
 )
 
-def get_ec_kenmen_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,dict,int]:
+def get_ec_kenmen_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,dict,dict,int]:
 
     mapping = split_bits(mapping_str, [
         11,# reserved
@@ -45,7 +46,12 @@ def get_ec_kenmen_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,d
     # ticket_infoの辞書の作成
     ticket_info = get_ticket_info(request_data, mapping, order_info)
 
-    return (interface_info, order_info, ticket_info, httpstatus)
+    # order_detailsを生成（B,H,J要求区分の場合のみ）
+    order_details = {}
+    if request_data["yokyu_kubun"] in {"B", "H", "J"}:
+        order_details = get_order_details_dictionary(request_data)
+
+    return (interface_info, order_info, ticket_info, order_details, httpstatus)
 
 def get_order_info(request_data:dict, mapping:list) -> dict:
     """
@@ -170,4 +176,3 @@ def get_ec_ticket_kenmen_info(map_num:int) -> tuple[str,str]:
         8: ("TTOT000178","TI03190101")
     }, map_num, ("ETPI001102","NTPI001102"))
     return res
-

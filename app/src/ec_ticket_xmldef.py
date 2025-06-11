@@ -71,7 +71,7 @@ def ec_ticket_output_xml(
 </response>
 </sejmsg>"""
         # 要求区分B,H,Jでorder_detailsが必要なケース  
-        elif (request_data["yokyu_kubun"] in {"B", "H", "J"} and order_details):
+        elif (request_data["yokyu_kubun"] in {"B", "H", "J"}):
             res = f"""<?xml version="1.0" encoding="Windows-31J"?>
 <sejmsg xmlns="http://sej.co.jp/">
 <response>

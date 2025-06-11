@@ -1,4 +1,3 @@
-
 from flask import Response
 from logger import get_logger
 logger = get_logger()
@@ -107,12 +106,15 @@ def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, dict, i
     res_order_info:dict = {}
     res_ticket_info:dict = {}
     res_payback_info:dict = {}
+    res_order_details:dict = {}
+    
     # No.1_EC関連問合せ応答_マッピング
     if mapping_no == 0:
         # マッピングで指定する応答値の作成
         (res_interface_info,
          res_order_info,
          res_ticket_info,
+         res_order_details,
          httpstatus) = get_ec_nomal_field(request_data, mapping_str)
 
     # No.2_EC関連払戻し応答_マッピング    
@@ -127,12 +129,15 @@ def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, dict, i
         (res_interface_info,
          res_order_info,
          res_ticket_info,
+         res_order_details,
          httpstatus) = get_ec_complete_field(request_data, mapping_str)
+         
     # No.4_EC関連問合せ応答(券面情報)_マッピング
     elif mapping_no == 3:
         (res_interface_info,
          res_order_info,
          res_ticket_info,
+         res_order_details,
          httpstatus) = get_ec_kenmen_field(request_data, mapping_str)
     else:
         raise ValueError(f"マッピング番号が不正です。")
@@ -143,5 +148,6 @@ def make_ticket_info(request_data:dict) -> tuple[dict, dict, dict, dict, dict, i
     interface_info.update(res_interface_info)
     order_info.update(res_order_info)
     payback_info.update(res_payback_info)
+    order_details.update(res_order_details)
 
     return (interface_info, order_info, res_ticket_info, payback_info, order_details, httpstatus)

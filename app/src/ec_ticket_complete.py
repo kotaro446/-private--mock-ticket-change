@@ -7,9 +7,10 @@ from ticket_library import (
 from ec_ticket_library import (
     get_ticket_info,
     get_ec_kanryo_inshi_syukin_gaku,
+    get_order_details_dictionary,
 )
 
-def get_ec_complete_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,dict,int]:
+def get_ec_complete_field(request_data:dict, mapping_str:str) -> tuple[dict,dict,dict,dict,int]:
 
     mapping = split_bits(mapping_str, [
         11,# reserved
@@ -35,8 +36,13 @@ def get_ec_complete_field(request_data:dict, mapping_str:str) -> tuple[dict,dict
     order_info = get_order_info(request_data, mapping)
     # ticket_infoの辞書を作成
     ticket_info = get_ticket_info(request_data, mapping[8], order_info)
+    
+    # order_detailsを生成（B,H,J要求区分の場合のみ）
+    order_details = {}
+    if request_data["yokyu_kubun"] in {"B", "H", "J"}:
+        order_details = get_order_details_dictionary(request_data)
         
-    return (interface_info, order_info, ticket_info, httpstatus)
+    return (interface_info, order_info, ticket_info, order_details, httpstatus)
 
 def get_interface_info(request_data:dict, mapping:list)->tuple[dict, int]:
     """
@@ -219,7 +225,6 @@ def get_ec_kanryo_siharaihoho_kubun(map_num:int) -> str:
     res = req_res_map({
         0 : "1", #クレジット支払
         1 : "2", #クレジット支払以外
-        2 : " ", #” ”スペース：ネット商品返品の場合
+        2 : " ", #" "スペース：ネット商品返品の場合
     }, map_num, "1")
     return res
-

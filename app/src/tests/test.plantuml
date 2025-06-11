@@ -1,0 +1,170 @@
+@startuml EC_Ticket_System
+
+!define RECTANGLE class
+
+' メインフロー
+RECTANGLE main {
+  +mock_ecticket_ms_main(request_data: dict): Response
+}
+
+RECTANGLE ec_ticket {
+  +make_ticket_info(request_data: dict): tuple
+}
+
+RECTANGLE ec_ticket_library {
+  +ec_ticket_validate_check(request_data: dict): str
+  +get_interface_info_dictionary(request_data: dict): dict
+  +get_order_info_dictionary(request_data: dict): dict
+  +get_payback_info_dictionary(request_data: dict): dict
+  +get_order_details_dictionary(request_data: dict): dict
+  +get_test_option(request_data: dict): tuple
+  +get_ticket_info(request_data: dict, map_num: int, order_info: dict): dict
+  +check_pia_ticket(shop_id: str): bool
+}
+
+RECTANGLE ec_ticket_nomal {
+  +get_ec_nomal_field(request_data: dict, mapping_str: str): tuple
+  +get_interface_info(request_data: dict, mapping: list): tuple
+  +get_order_info(request_data: dict, mapping: list): dict
+}
+
+RECTANGLE ec_ticket_refund {
+  +get_ec_refund_field(request_data: dict, mapping_str: str): tuple
+  +get_interface_info(request_data: dict, mapping: list): tuple
+  +get_payback_info(request_data: dict, mapping: list): dict
+}
+
+RECTANGLE ec_ticket_complete {
+  +get_ec_complete_field(request_data: dict, mapping_str: str): tuple
+  +get_interface_info(request_data: dict, mapping: list): tuple
+  +get_order_info(request_data: dict, mapping: list): dict
+}
+
+RECTANGLE ec_ticket_kenmen {
+  +get_ec_kenmen_field(request_data: dict, mapping_str: str): tuple
+  +get_order_info(request_data: dict, mapping: list): dict
+  +get_ticket_info(request_data: dict, mapping: list, order_info: dict): dict
+}
+
+RECTANGLE ec_ticket_xmldef {
+  +ec_ticket_output_xml(...): str
+}
+
+RECTANGLE ticket_library {
+  +req_res_map(mapping: dict, map_num: int, default): any
+  +split_bits(mapping_str: str, bit_lengths: list): list
+  +calculate_CD(code: str): str
+}
+
+' 呼び出し関係
+main --> ec_ticket : mock_ecticket_ms_main calls make_ticket_info
+ec_ticket --> ec_ticket_library : validate & get dictionaries
+ec_ticket --> ec_ticket_nomal : mapping_no == 0
+ec_ticket --> ec_ticket_refund : mapping_no == 1
+ec_ticket --> ec_ticket_complete : mapping_no == 2
+ec_ticket --> ec_ticket_kenmen : mapping_no == 3
+main --> ec_ticket_xmldef : generate XML response
+
+ec_ticket_nomal --> ec_ticket_library : get_ticket_info
+ec_ticket_complete --> ec_ticket_library : get_ticket_info
+ec_ticket_kenmen --> ec_ticket_library : various utility functions
+ec_ticket_refund --> ticket_library : split_bits, req_res_map
+
+ec_ticket_nomal --> ticket_library : split_bits, req_res_map
+ec_ticket_complete --> ticket_library : split_bits, req_res_map
+ec_ticket_kenmen --> ticket_library : split_bits, req_res_map, calculate_CD
+
+note right of main
+  エントリーポイント
+  リクエスト受信・レスポンス返却
+end note
+
+note right of ec_ticket
+  メインビジネスロジック
+  マッピング番号による分岐処理
+end note
+
+note right of ec_ticket_library
+  共通ライブラリ
+  バリデーション・辞書生成
+end note
+
+note bottom of ec_ticket_nomal
+  No.1 EC関連問合せ応答
+  チケット発券・取消処理
+end note
+
+note bottom of ec_ticket_refund
+  No.2 EC関連払戻し応答
+  チケット払戻し・取消処理
+end note
+
+note bottom of ec_ticket_complete
+  No.3 EC関連完了応答
+  完了通知処理
+end note
+
+note bottom of ec_ticket_kenmen
+  No.4 EC関連問合せ応答(券面情報)
+  券面情報付きチケット処理
+end note
+
+@enduml
+
+' シーケンス図
+@startuml EC_Ticket_Sequence
+
+actor Client
+participant "Flask App" as Flask
+participant "ec_ticket.py" as Main
+participant "ec_ticket_library.py" as Lib
+participant "ec_ticket_nomal.py" as Normal
+participant "ec_ticket_xmldef.py" as XML
+
+Client -> Flask : POST /inkessai/recvrequest.do
+Flask -> Main : mock_ecticket_ms_main(request_data)
+
+Main -> Lib : ec_ticket_validate_check(request_data)
+Lib --> Main : validation_result
+
+alt validation_result == "00"
+    Main -> Main : make_ticket_info(request_data)
+    
+    Main -> Lib : get_interface_info_dictionary(request_data)
+    Lib --> Main : interface_info
+    
+    Main -> Lib : get_order_info_dictionary(request_data)
+    Lib --> Main : order_info
+    
+    Main -> Lib : get_payback_info_dictionary(request_data)
+    Lib --> Main : payback_info
+    
+    Main -> Lib : get_order_details_dictionary(request_data)
+    Lib --> Main : order_details
+    
+    Main -> Lib : get_test_option(request_data)
+    Lib --> Main : (mapping_no, mapping_str)
+    
+    alt mapping_no == 0
+        Main -> Normal : get_ec_nomal_field(request_data, mapping_str)
+        Normal -> Lib : get_ticket_info(...)
+        Lib --> Normal : ticket_info
+        Normal --> Main : (interface_info, order_info, ticket_info, httpstatus)
+    else mapping_no == 1
+        Main -> Main : get_ec_refund_field(...)
+    else mapping_no == 2
+        Main -> Main : get_ec_complete_field(...)
+    else mapping_no == 3
+        Main -> Main : get_ec_kenmen_field(...)
+    end
+    
+    Main --> Main : (interface_info, order_info, ticket_info, payback_info, order_details, httpstatus)
+end
+
+Main -> XML : ec_ticket_output_xml(...)
+XML --> Main : xml_response
+
+Main --> Flask : Response(xml_response, httpstatus)
+Flask --> Client : HTTP Response
+
+@enduml
