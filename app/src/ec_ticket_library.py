@@ -39,7 +39,7 @@ def ec_ticket_validate_check(request_data:dict) -> str:
     # 業務区分エラー
     elif request_data["gyomu_kubun"] != "0067":
         res = "11"
-        logger.debug(f"電文区分エラー　syori_kekka: {res}")
+        logger.debug(f"業務区分エラー　syori_kekka: {res}")
     else:
         res = "00"
     return res
